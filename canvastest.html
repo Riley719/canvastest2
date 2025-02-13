@@ -76,14 +76,29 @@
         }
         .range-slider {
             display: flex;
-            align-items: center;
+            flex-direction: column; /* 縦に並べる */
+            align-items: flex-start;
             margin-left: 20px;
         }
-        .pen-width-preview {
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .pen-width-preview, .eraser-width-preview {
             display: inline-block;
-            background-color: #ff0000;
             border-radius: 50%;
             margin-left: 10px;
+        }
+
+        .pen-width-preview {
+            background-color: #ff0000;
+        }
+
+        .eraser-width-preview {
+            background-color: #ffffff;
+            border: 1px solid #000000;
         }
         .clear-button {
             margin-left: auto;
@@ -113,8 +128,17 @@
         <span class="switch-label">手書きモード</span>
         <label class="range-slider">
             ペンの太さ:
-            <input type="range" id="penWidthSlider" min="1" max="50" value="2">
-            <span id="penWidthPreview" class="pen-width-preview" style="width: 2px; height: 2px;"></span>
+            <div class="slider-container">
+                <input type="range" id="penWidthSlider" min="1" max="50" value="2">
+                <span id="penWidthPreview" class="pen-width-preview" style="width: 2px; height: 2px;"></span>
+            </div>
+        </label>
+        <label class="range-slider">
+            消しゴムの太さ:
+            <div class="slider-container">
+                <input type="range" id="eraserWidthSlider" min="1" max="50" value="10">
+                <span id="eraserWidthPreview" class="eraser-width-preview" style="width: 10px; height: 10px;"></span>
+            </div>
         </label>
         <div class="tool-selector">
             <input type="radio" id="penTool" name="tool" value="pen" checked>
@@ -175,6 +199,7 @@
         var strokeColor = '#ff0000';
         var handwritingMode = true;
         var penWidth = 2;
+        var eraserWidth = 10;
         var tool = 'pen';
 
         function getTouchPos(canvas, touchEvent) {
@@ -196,7 +221,7 @@
             previewCtx.strokeStyle = 'rgba(0,0,0,0.5)';
             previewCtx.lineWidth = 1;
             previewCtx.beginPath();
-            previewCtx.arc(x, y, penWidth / 2, 0, Math.PI * 2);
+            previewCtx.arc(x, y, eraserWidth / 2, 0, Math.PI * 2);
             previewCtx.stroke();
             previewCtx.restore();
         }
@@ -224,11 +249,12 @@
                     if (tool === 'pen') {
                         ctx.globalCompositeOperation = 'source-over';
                         ctx.strokeStyle = strokeColor;
+                        ctx.lineWidth = penWidth;
                     } else if (tool === 'eraser') {
                         ctx.globalCompositeOperation = 'destination-out';
                         ctx.strokeStyle = 'rgba(0,0,0,1)';
+                        ctx.lineWidth = eraserWidth;
                     }
-                    ctx.lineWidth = penWidth;
                     ctx.lineTo(currentX, currentY);
                     ctx.stroke();
                     ctx.beginPath();
@@ -282,11 +308,12 @@
                     if (tool === 'pen') {
                         ctx.globalCompositeOperation = 'source-over';
                         ctx.strokeStyle = strokeColor;
+                        ctx.lineWidth = penWidth;
                     } else if (tool === 'eraser') {
                         ctx.globalCompositeOperation = 'destination-out';
                         ctx.strokeStyle = 'rgba(0,0,0,1)';
+                        ctx.lineWidth = eraserWidth;
                     }
-                    ctx.lineWidth = penWidth;
                     ctx.lineTo(currentX, currentY);
                     ctx.stroke();
                     ctx.beginPath();
@@ -344,6 +371,14 @@
             var preview = document.getElementById('penWidthPreview');
             preview.style.width = penWidth + 'px';
             preview.style.height = penWidth + 'px';
+        });
+        
+        // 消しゴムの太さを変更するスライドバーのイベントリスナー
+        document.getElementById('eraserWidthSlider').addEventListener('input', function() {
+            eraserWidth = this.value;
+            var preview = document.getElementById('eraserWidthPreview');
+            preview.style.width = eraserWidth + 'px';
+            preview.style.height = eraserWidth + 'px';
         });
 
         // キャンバスをクリアするイベントリスナー
