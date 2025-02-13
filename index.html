@@ -100,6 +100,7 @@
             background-color: #ffffff;
             border: 1px solid #000000;
         }
+
         .clear-button {
             margin-left: auto;
             margin-right: 20px;
@@ -145,38 +146,69 @@
             <label for="penTool">ペン</label>
             <input type="radio" id="eraserTool" name="tool" value="eraser">
             <label for="eraserTool">消しゴム</label>
+            <input type="radio" id="pointerTool" name="tool" value="pointer">
+            <label for="pointerTool">ポインター</label>
         </div>
         <button class="clear-button" id="clearCanvasButton">Clear</button>
     </div>
-    あいうえおかきくけこ
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
-    <p>おい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
+    <p>あおい</p>
     <canvas id="drawncanvas"></canvas>
     <canvas id="previewCanvas"></canvas>
     <script>
@@ -195,6 +227,7 @@
         previewCanvas.style.pointerEvents = 'none';
 
         var drawing = false;
+        var pointerDown = false;
         var lastX, lastY;
         var strokeColor = '#ff0000';
         var handwritingMode = true;
@@ -226,22 +259,40 @@
             previewCtx.restore();
         }
 
-        // 既存のマウスイベントリスナー
+        function drawPointer(x, y) {
+            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            previewCtx.save();
+            previewCtx.globalCompositeOperation = 'source-over';
+            previewCtx.fillStyle = 'rgba(255,0,0,0.7)';
+            previewCtx.shadowColor = 'rgba(255,0,0,0.8)';
+            previewCtx.shadowBlur = 10;
+            previewCtx.beginPath();
+            previewCtx.arc(x, y, 5, 0, Math.PI * 2);
+            previewCtx.fill();
+            previewCtx.restore();
+        }
+
+        // マウスイベントリスナー
         canvas.addEventListener('mousedown', function(e) {
             if (handwritingMode) {
-                drawing = true;
-                lastX = e.offsetX - canvas.offsetLeft;
-                lastY = e.offsetY - canvas.offsetTop;
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineCap = 'round';
+                if (tool === 'pointer') {
+                    pointerDown = true;
+                    drawPointer(e.offsetX - canvas.offsetLeft, e.offsetY - canvas.offsetTop);
+                } else {
+                    drawing = true;
+                    lastX = e.offsetX - canvas.offsetLeft;
+                    lastY = e.offsetY - canvas.offsetTop;
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineCap = 'round';
+                }
             }
         });
 
         canvas.addEventListener('mousemove', function(e) {
+            var currentX = e.offsetX - canvas.offsetLeft;
+            var currentY = e.offsetY - canvas.offsetTop;
             if (handwritingMode) {
-                var currentX = e.offsetX - canvas.offsetLeft;
-                var currentY = e.offsetY - canvas.offsetTop;
                 if (tool === 'eraser' && drawing) {
                     drawEraserPreview(currentX, currentY);
                 }
@@ -262,11 +313,15 @@
                     lastX = currentX;
                     lastY = currentY;
                 }
+                if (tool === 'pointer' && pointerDown) {
+                    drawPointer(currentX, currentY);
+                }
             }
         });
 
         canvas.addEventListener('mouseup', function() {
             if (handwritingMode) {
+                pointerDown = false;
                 drawing = false;
                 ctx.closePath();
                 previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -275,6 +330,7 @@
 
         canvas.addEventListener('mouseleave', function() {
             if (handwritingMode) {
+                pointerDown = false;
                 drawing = false;
                 ctx.closePath();
                 previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -284,14 +340,19 @@
         // Apple Pencilによるタッチ操作のみを許可するイベントリスナー
         canvas.addEventListener('touchstart', function(e) {
             if (isStylus(e) && handwritingMode) {
-                e.preventDefault();
-                drawing = true;
-                var touchPos = getTouchPos(canvas, e);
-                lastX = touchPos.x;
-                lastY = touchPos.y;
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineCap = 'round';
+                if (tool === 'pointer') {
+                    pointerDown = true;
+                    drawPointer(e.touches[0].clientX, e.touches[0].clientY);
+                } else {
+                    e.preventDefault();
+                    drawing = true;
+                    var touchPos = getTouchPos(canvas, e);
+                    lastX = touchPos.x;
+                    lastY = touchPos.y;
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineCap = 'round';
+                }
             }
         });
 
@@ -321,11 +382,15 @@
                     lastX = currentX;
                     lastY = currentY;
                 }
+                if (tool === 'pointer') {
+                    drawPointer(currentX, currentY);
+                }
             }
         });
 
         canvas.addEventListener('touchend', function(e) {
             if (isStylus(e) && handwritingMode) {
+                pointerDown = false;
                 drawing = false;
                 ctx.closePath();
                 previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -334,6 +399,7 @@
 
         canvas.addEventListener('touchcancel', function(e) {
             if (isStylus(e) && handwritingMode) {
+                pointerDown = false;
                 drawing = false;
                 ctx.closePath();
                 previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -343,6 +409,7 @@
         // pointerup イベントリスナーを追加
         canvas.addEventListener('pointerup', function(e) {
             if (e.pointerType === 'pen' && handwritingMode) {
+                pointerDown = false;
                 drawing = false;
                 ctx.closePath();
                 previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
